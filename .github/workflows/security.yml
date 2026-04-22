@@ -1,0 +1,72 @@
+# File: .github/workflows/security.yml
+# Simpan file ini di folder .github/workflows/ di repository kalian
+
+name: Security Check
+
+# Kapan pipeline ini berjalan?
+on:
+  push:                    # Setiap kali push
+    branches: [main]       # ke branch main
+  pull_request:            # Atau setiap ada Pull Request
+    branches: [main]
+
+jobs:
+  # === JOB 1: Cek Dependencies ===
+  cek-dependencies:
+    name: Cek Package yang Berbahaya
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4       # Download kode dari repo
+    
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+    
+      - name: Install dependencies
+        run: npm ci                     # Install berdasarkan lockfile
+    
+      - name: Jalankan NPM Audit
+        run: npm audit --audit-level=high
+        # Kalau ada vulnerability HIGH atau CRITICAL,
+        # pipeline akan GAGAL dan developer diberitahu
+
+  # === JOB 2: Scan Kode untuk Kerentanan ===
+  scan-kode:
+    name: Scan Kode Sumber
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+    
+      - name: Jalankan Semgrep
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: >-
+            p/javascript
+            p/owasp-top-ten
+        # Semgrep akan scan kode kalian mencari:
+        # - Hardcoded password/secret
+        # - SQL injection
+        # - XSS vulnerability
+        # - Dan masih banyak lagi
+        # GRATIS untuk open source!
+
+  # === JOB 3: Cek Apakah Ada Rahasia yang Ke-commit ===
+  cek-rahasia:
+    name: Deteksi Password di Kode
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0    # Scan SEMUA history commit
+    
+      - name: Jalankan Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # Gitleaks akan scan kode kalian mencari:
+        # - API keys
+        # - Password database
+        # - Secret tokens
+        # - SSH keys
+        # Scan semua commit, bukan hanya yang terbaru!
