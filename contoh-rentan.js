@@ -6,6 +6,7 @@ const express = require('express')
 const app = express()
 
 // MASALAH 1: Hardcoded secret (akan ditangkap Semgrep)
+// Password sengaja dibuat hardcode di file code program untuk demo
 const SECRET = "password-rahasia-jwt-saya-123"
 
 // MASALAH 2: SQL Injection (akan ditangkap Semgrep)
