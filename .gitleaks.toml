@@ -1,0 +1,30 @@
+# Konfigurasi Gitleaks custom untuk demo
+# Menambahkan aturan deteksi tambahan
+
+title = "Gitleaks Config untuk Demo Keamanan"
+
+# Deteksi file .env yang seharusnya tidak di-commit
+[[rules]]
+id = "env-file-secrets"
+description = "File .env berisi secrets yang seharusnya tidak di-commit"
+path = '''\.env$'''
+regex = '''(?i)(password|secret|key|token)\s*=\s*.+'''
+
+# Deteksi hardcoded password di kode JavaScript
+[[rules]]
+id = "hardcoded-password-js"
+description = "Password hardcoded di file JavaScript"
+regex = '''(?i)(password|passwd|pwd|secret)\s*=\s*["'][^"']{8,}["']'''
+path = '''\.js$'''
+
+# Deteksi MongoDB connection string dengan password
+[[rules]]
+id = "mongodb-connection-string"
+description = "MongoDB connection string dengan credentials"
+regex = '''mongodb(\+srv)?://[^:]+:[^@]+@'''
+
+# Deteksi generic API key
+[[rules]]
+id = "generic-api-key"
+description = "Generic API Key terdeteksi"
+regex = '''(?i)(api[_-]?key|api[_-]?secret|secret[_-]?key)\s*=\s*["'][^"']{16,}["']'''
